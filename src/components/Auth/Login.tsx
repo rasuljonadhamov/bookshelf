@@ -54,7 +54,12 @@ const Login: React.FC = () => {
         >
           Login
         </button>
-        <Link to={"/register"}>Register</Link>
+        <Link
+          className="bg-green-400 mt-4 block text-center   w-full px-4 py-2 text-white rounded-md hover:opacity-65"
+          to={"/register"}
+        >
+          Register
+        </Link>
         {error && (
           <p className="mt-2 text-red-500">Login failed. Please try again.</p>
         )}
