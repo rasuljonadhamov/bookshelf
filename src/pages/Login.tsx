@@ -10,7 +10,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://no23.lavina.tech/login", {
+      const response = await fetch("https://no23.lavina.tech/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
