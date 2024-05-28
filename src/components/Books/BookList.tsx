@@ -1,31 +1,30 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useGetBooksQuery } from "../../api/bookApi";
-import { useDispatch, useSelector } from "react-redux";
-import { setBooks, selectBooks } from "../../features/bookSlice";
-import BookItem from "./BookItem";
+import EditBook from "./EditBook";
+import DeleteBook from "./DeleteBook";
 
 const BookList: React.FC = () => {
-  const dispatch = useDispatch();
-  const { data: books, error, isLoading } = useGetBooksQuery();
-  const bookList = useSelector(selectBooks);
+  const { data, error, isLoading } = useGetBooksQuery();
 
-  useEffect(() => {
-    if (books) {
-      dispatch(setBooks(books));
-    }
-  }, [books, dispatch]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading books</div>;
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Failed to load books.</p>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-center">Book List</h2>
-      <ul>
-        {bookList.map((book) => (
-          <BookItem key={book.id} book={book} />
-        ))}
-      </ul>
+    <div className="space-y-4">
+      {data?.data?.map((book: any) => (
+        <div
+          key={book.book.id}
+          className="p-4 mb-4 bg-white rounded-md shadow-md"
+        >
+          <h3 className="text-xl font-bold">{book.book.title}</h3>
+          <p>Author: {book.book.author}</p>
+          <p>Published: {book.book.published}</p>
+          <p>Pages: {book.book.pages}</p>
+          <p>Status: {book.status}</p>
+          <EditBook id={book.book.id} />
+          <DeleteBook id={book.book.id} />
+        </div>
+      ))}
     </div>
   );
 };

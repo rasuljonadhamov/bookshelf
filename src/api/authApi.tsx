@@ -1,33 +1,47 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { RootState } from "../app/store";
-
-interface User {
-  email: string;
-  password: string;
-  key?: string;
-  secret?: string;
-  token?: string;
-}
+import { RootState } from "../app/store";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://no23.lavina.tech" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://no23.lavina.tech",
+    prepareHeaders: (headers, { getState }) => {
+      const state = getState() as RootState;
+      const key = state.auth.key;
+      const sign = state.auth.sign;
+      if (key) {
+        headers.set("Key", key);
+      }
+      if (sign) {
+        headers.set("Sign", sign);
+      }
+      return headers;
+    },
+  }),
   endpoints: (builder) => ({
-    login: builder.mutation<User, Partial<User>>({
-      query: (credentials) => ({
-        url: "/login",
-        method: "POST",
-        body: credentials,
-      }),
-    }),
-    register: builder.mutation<User, Partial<User>>({
-      query: (credentials) => ({
+    register: builder.mutation({
+      query: (user) => ({
         url: "/signup",
         method: "POST",
-        body: credentials,
+        body: user,
+      }),
+    }),
+    login: builder.mutation({
+      query: (user) => ({
+        url: "/login",
+        method: "POST",
+        body: user,
+      }),
+    }),
+    addBook: builder.mutation({
+      query: (book) => ({
+        url: "/books",
+        method: "POST",
+        body: book,
       }),
     }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useRegisterMutation, useLoginMutation, useAddBookMutation } =
+  authApi;

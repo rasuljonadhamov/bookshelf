@@ -1,6 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
 import md5 from "md5";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../app/store";
 
 const prepareHeaders = (
@@ -8,20 +7,18 @@ const prepareHeaders = (
   { getState }: { getState: () => RootState }
 ) => {
   const state = getState();
-  const { token, secret } = state.auth;
+  const method = headers.get("method") || "";
+  const url = headers.get("url") || "";
+  const body = headers.get("body") || "";
 
-  if (token && secret) {
-    headers.set("Key", token);
+  const userKey = state.auth.key;
+  const userSecret = state.auth.secret;
 
-    const method = headers.get("method") || "GET";
-    const url = headers.get("url") || "";
-    const body = headers.get("body") || "";
+  const stringToSign = `${method}${url}${body}${userSecret}`;
+  const sign = md5(stringToSign);
 
-    const signString = `${method}${url}${body}${secret}`;
-    const sign = md5(signString);
-
-    headers.set("Sign", sign);
-  }
+  headers.set("Key", userKey);
+  headers.set("Sign", sign);
 
   return headers;
 };
@@ -33,24 +30,24 @@ export const bookApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getBooks: builder.query({
-      query: () => "/books",
+    getBooks: builder.query<any, void>({
+      query: () => ({ url: "/books", method: "GET" }),
     }),
-    addBook: builder.mutation({
-      query: (newBook) => ({
+    addBook: builder.mutation<any, { isbn: string }>({
+      query: (book) => ({
         url: "/books",
         method: "POST",
-        body: newBook,
+        body: book,
       }),
     }),
-    editBook: builder.mutation({
-      query: ({ id, ...rest }) => ({
+    editBook: builder.mutation<any, { id: number; status: number }>({
+      query: ({ id, status }) => ({
         url: `/books/${id}`,
-        method: "PUT",
-        body: rest,
+        method: "PATCH",
+        body: { status },
       }),
     }),
-    deleteBook: builder.mutation({
+    deleteBook: builder.mutation<any, { id: number }>({
       query: ({ id }) => ({
         url: `/books/${id}`,
         method: "DELETE",
